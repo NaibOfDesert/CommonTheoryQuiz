@@ -6,58 +6,113 @@ using UnityEngine.UI;
 
 public class Quiz : MonoBehaviour
 {
+    [Header("Questions")]
     [SerializeField] TextMeshProUGUI questionText;
-    [SerializeField] QuestionSO question;
+    [SerializeField] List<QuestionSO> questions = new List<QuestionSO>();
+    QuestionSO currentQuestion;
+    
+    [Header("Answers")]
     [SerializeField] GameObject[] answerButtons;
     int correctAnswerIndex;
+    bool hasAnsweredEarly;
+    
+    [Header("Button Colors")]
     [SerializeField] Sprite defaultAnswerSprite;
     [SerializeField] Sprite correctAnswerSprite;
+    
+    [Header("Timers")]
+    [SerializeField] Image timerImage;
+    TimerController timerController;
+
+    [Header("Scoring")]
+    [SerializeField] TextMeshProUGUI scoreText;
+    ScoreController scoreController;
 
 
     void Start()
     {
-        GetNextQuestion();
+        timerController = FindObjectOfType<TimerController>();
         // DisplayQuestions();
         
     }
 
+    void Update()
+    {
+        timerImage.fillAmount = timerController.fillFraction;
+        if (timerController.loadNextQuestion)
+        {
+            hasAnsweredEarly = false;
+            GetNextQuestion();
+            timerController.loadNextQuestion = false;
+        }
+        else if (!hasAnsweredEarly && !timerController.isAnsweringQuestion)
+        {
+            DisplayAnswer(-1);
+            SetButtonState(false);
+        }
+    }
+
     public void OnAnswerSelected(int index)
     {
-        Image buttonImage;
+        hasAnsweredEarly = true;
+        DisplayAnswer(index);
+        SetButtonState(false);
+        timerController.CancelTimer();
+        scoreText.text = "Score: " + scoreController.CalculateScore() + "%";
+    }
 
-        if (index == question.GetCorrectAnswerIndex())
+    void DisplayAnswer(int index)
+    {
+        Image buttonImage; //
+
+        if (index == currentQuestion.GetCorrectAnswerIndex())
         {
             Debug.Log("Click");
             questionText.text = "Correct!";
             buttonImage = answerButtons[index].GetComponent<Image>();
             buttonImage.sprite = correctAnswerSprite;
+            scoreController.IncrementCorrectAnswers();
         }
         else
         {
-            correctAnswerIndex = question.GetCorrectAnswerIndex();
-            string correctAnswer = question.GetAnswer(correctAnswerIndex);
+            correctAnswerIndex = currentQuestion.GetCorrectAnswerIndex();
+            string correctAnswer = currentQuestion.GetAnswer(correctAnswerIndex);
             questionText.text = "Uncorrect! It was ;\n" + correctAnswer;
             buttonImage = answerButtons[correctAnswerIndex].GetComponent<Image>();
             buttonImage.sprite = correctAnswerSprite;
         }
-
-        SetButtonState(false);
     }
 
     void GetNextQuestion()
     {
-        SetButtonState(true);
-        SetDeafaultButtonSprites();
-        DisplayQuestions();
+        if (questions.Count > 0)
+        {
+            SetButtonState(true);
+            SetDeafaultButtonSprites();
+            GetRandomQuestion();
+            DisplayQuestions();
+            scoreController.IncrementQuestionsSeen();
+        }
+      
+    }
+
+    void GetRandomQuestion()
+    {
+        int index = Random.Range(0, questions.Count);
+        currentQuestion = questions[index];
+        if (questions.Contains(currentQuestion))
+        {
+            questions.Remove(currentQuestion);
+        }
     }
 
     void DisplayQuestions()
     {
-        questionText.text = question.GetQuestion();
+        questionText.text = currentQuestion.GetQuestion();
         for (int i = 0; i < answerButtons.Length; i++)
         {
             TextMeshProUGUI buttonText = answerButtons[i].GetComponentInChildren<TextMeshProUGUI>();
-            buttonText.text = question.GetAnswer(i);
+            buttonText.text = currentQuestion.GetAnswer(i);
         }
     }
 
@@ -77,10 +132,5 @@ public class Quiz : MonoBehaviour
             Image buttonImage = answerButtons[i].GetComponent<Image>();
             buttonImage.sprite = defaultAnswerSprite;
         }
-    }
-
-    void Update()
-    {
-        
     }
 }

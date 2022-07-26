@@ -13,3 +13,9 @@ MonoBehaviour:
   m_Name: NewQuestion5
   m_EditorClassIdentifier: 
   question: What nationality was Albert Einstein?
+  answers:
+  - 1
+  - 1111
+  - 111
+  - 11
+  correctAnswerIndex: 0

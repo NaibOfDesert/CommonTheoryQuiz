@@ -13,3 +13,9 @@ MonoBehaviour:
   m_Name: NewQuestion2
   m_EditorClassIdentifier: 
   question: Who was nikola tesla?
+  answers:
+  - 1
+  - 2
+  - 3
+  - 4
+  correctAnswerIndex: 2
