@@ -25,9 +25,20 @@ public class Quiz : MonoBehaviour
 
     void Start()
     {
+        timer = FindObjectOfType<TimerController>();
         GetNextQuestion();
         // DisplayQuestions();
         
+    }
+
+    void Update()
+    {
+        timerImager.fillAmount = timer.fillFraction;
+        if (timer.loadNextQuestion)
+        {
+            GetNextQuestion();
+            timer.loadNextQuestion = false;
+        }
     }
 
     public void OnAnswerSelected(int index)
@@ -51,6 +62,7 @@ public class Quiz : MonoBehaviour
         }
 
         SetButtonState(false);
+        timer.CancelTimer();
     }
 
     void GetNextQuestion()
@@ -86,10 +98,5 @@ public class Quiz : MonoBehaviour
             Image buttonImage = answerButtons[i].GetComponent<Image>();
             buttonImage.sprite = defaultAnswerSprite;
         }
-    }
-
-    void Update()
-    {
-        
     }
 }
