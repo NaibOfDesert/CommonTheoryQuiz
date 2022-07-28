@@ -10,7 +10,7 @@ public class TimerController : MonoBehaviour
 
     public bool loadNextQuestion;
     public float fillFraction;
-    public bool isAnsweringQuestion = false;
+    public bool isAnsweringQuestion;
     
     float timerValue;
 
